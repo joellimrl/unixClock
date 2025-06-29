@@ -37,6 +37,18 @@ class UnixClock {
         this.boundHandleVisibilityChange = () => this.handleVisibilityChange();
         this.boundHandleWheel = (e) => this.handleWheel(e);
         this.boundHandleKeyboard = (e) => this.handleKeyboard(e);
+        this.boundHandleTouchStart = (e) => this.handleTouchStart(e);
+        this.boundHandleTouchMove = (e) => this.handleTouchMove(e);
+        this.boundHandleTouchEnd = (e) => this.handleTouchEnd(e);
+        this.debouncedScrollFeedback = this.createDebouncedScrollHandler();
+        
+        // Touch state tracking
+        this.touchState = {
+            startY: null,
+            startTime: null,
+            isScrolling: false,
+            threshold: 50 // Minimum distance for scroll action
+        };
     }
     
     /**
@@ -57,9 +69,6 @@ class UnixClock {
             
             // Initialize scroll and keyboard handlers
             this.initializeScrollHandlers();
-            
-            // Initialize accessibility features
-            this.initializeAccessibility();
             
             // Start real-time updates
             this.startClock();
@@ -84,12 +93,29 @@ class UnixClock {
     }
 
     /**
-     * Create spaced version for visual display with thin spaces
+     * Create timestamp with CSS-based visual separation
+     * Returns HTML with spans for each digit group
      */
     createSpacedTimestamp(timestamp) {
         const timestampStr = timestamp.toString();
-        // Use thin space (U+2009) for better visual appearance
-        return timestampStr.replace(/\B(?=(\d{3})+(?!\d))/g, '\u2009');
+        // Split into groups of 3 digits from right to left
+        const groups = [];
+        let str = timestampStr;
+        
+        while (str.length > 0) {
+            if (str.length <= 3) {
+                groups.unshift(str);
+                break;
+            } else {
+                groups.unshift(str.slice(-3));
+                str = str.slice(0, -3);
+            }
+        }
+        
+        // Create spans for each group to enable CSS styling
+        return groups.map((group, index) => 
+            `<span class="digit-group" data-group="${index}">${group}</span>`
+        ).join('');
     }
     
     /**
@@ -222,7 +248,7 @@ class UnixClock {
         if (this.unixTimestampElement) {
             const spacedTimestamp = this.createSpacedTimestamp(this.state.currentTimestamp);
             
-            this.unixTimestampElement.textContent = spacedTimestamp;
+            this.unixTimestampElement.innerHTML = spacedTimestamp;
             this.unixTimestampElement.setAttribute('data-raw', this.state.currentTimestamp.toString());
             this.unixTimestampElement.setAttribute('datetime', now.toISOString());
         }
@@ -235,6 +261,9 @@ class UnixClock {
         
         // Update milestone states if needed
         this.updateMilestoneStates();
+        
+        // Update countdown timers
+        this.updateCountdownTimers();
     }
     
     /**
@@ -259,8 +288,7 @@ class UnixClock {
         this.renderMilestoneSection('top');
         this.renderMilestoneSection('bottom');
         
-        // Update accessibility after rendering
-        setTimeout(() => this.updateMilestoneAccessibility(), 0);
+        // Milestone rendering complete
     }
 
     /**
@@ -337,11 +365,47 @@ class UnixClock {
     }
 
     /**
+     * Render milestone section with instant transitions (no fade)
+     */
+    renderMilestoneSectionWithAnimation(section) {
+        const container = section === 'top' ? this.topMilestoneContainer : this.bottomMilestoneContainer;
+        const milestones = this.state.visibleMilestones[section];
+        
+        if (!container || !milestones) return;
+        
+        // Clear and add new cards immediately (no fade animation)
+        container.innerHTML = '';
+        
+        // Create and add new cards instantly
+        milestones.forEach((milestone) => {
+            const milestoneCard = this.createMilestoneCard(milestone);
+            container.appendChild(milestoneCard);
+        });
+    }
+
+    /**
+     * Add timestamp update animation
+     */
+    animateTimestampUpdate() {
+        if (this.unixTimestampElement) {
+            this.unixTimestampElement.classList.add('updating');
+            setTimeout(() => {
+                this.unixTimestampElement.classList.remove('updating');
+            }, 1000);
+        }
+    }
+
+    /**
      * Initialize scroll and keyboard handlers for milestone navigation
      */
     initializeScrollHandlers() {
-        // Add wheel event listener for milestone scrolling
+        // Add wheel event listener for milestone scrolling (desktop)
         document.addEventListener('wheel', this.boundHandleWheel, { passive: false });
+        
+        // Add touch event listeners for mobile scrolling
+        document.addEventListener('touchstart', this.boundHandleTouchStart, { passive: false });
+        document.addEventListener('touchmove', this.boundHandleTouchMove, { passive: false });
+        document.addEventListener('touchend', this.boundHandleTouchEnd, { passive: false });
         
         // Add keyboard navigation
         document.addEventListener('keydown', this.boundHandleKeyboard);
@@ -351,12 +415,6 @@ class UnixClock {
      * Handle wheel events for milestone scrolling
      */
     handleWheel(event) {
-        // Only handle wheel events when not over the main clock
-        const clockElement = document.querySelector('.main-clock');
-        if (clockElement && clockElement.contains(event.target)) {
-            return;
-        }
-        
         event.preventDefault();
         
         // Determine scroll direction
@@ -381,15 +439,51 @@ class UnixClock {
                 event.preventDefault();
                 this.scrollMilestones(1);
                 break;
-            case 'Space':
-                event.preventDefault();
-                this.announceCurrentTime();
-                break;
         }
     }
 
     /**
-     * Scroll milestones in the specified direction
+     * Handle touch start events for mobile scrolling
+     */
+    handleTouchStart(event) {
+        this.touchState.startY = event.touches[0].clientY;
+        this.touchState.startTime = Date.now();
+        this.touchState.isScrolling = false;
+    }
+
+    /**
+     * Handle touch move events for mobile scrolling
+     */
+    handleTouchMove(event) {
+        if (!this.touchState.startY) return;
+        
+        const currentY = event.touches[0].clientY;
+        const deltaY = this.touchState.startY - currentY;
+        const absDeltaY = Math.abs(deltaY);
+        
+        // Check if we've moved enough to trigger scrolling
+        if (absDeltaY > this.touchState.threshold && !this.touchState.isScrolling) {
+            event.preventDefault();
+            this.touchState.isScrolling = true;
+            
+            // Determine scroll direction
+            const direction = deltaY > 0 ? 1 : -1; // Positive = scroll down
+            this.scrollMilestones(direction);
+        }
+    }
+
+    /**
+     * Handle touch end events for mobile scrolling
+     */
+    handleTouchEnd() {
+        // Reset touch state
+        this.touchState.startY = null;
+        this.touchState.startTime = null;
+        this.touchState.isScrolling = false;
+    }
+
+    /**
+     * Scroll milestones in the specified direction with simple transitions
      * Positive direction = scroll down (show later milestones)
      * Negative direction = scroll up (show earlier milestones)
      */
@@ -400,21 +494,105 @@ class UnixClock {
             return;
         }
         
+        // Add simple scrolling animation classes
+        this.addScrollAnimationClasses(direction);
+        
         // Update offset (direction is already +1 or -1)
         this.state.milestoneOffset += direction;
         
-        // The wrapping/cycling logic is handled in updateVisibleMilestones()
         // Update visible milestones and re-render
         this.updateVisibleMilestones();
-        this.renderMilestoneSection('top');
-        this.renderMilestoneSection('bottom');
+        this.renderMilestoneSectionWithAnimation('top');
+        this.renderMilestoneSectionWithAnimation('bottom');
+    }
+
+    /**
+     * Add animation classes to milestone containers for smooth scrolling
+     */
+    addScrollAnimationClasses() {
+        const containers = [this.topMilestoneContainer, this.bottomMilestoneContainer];
         
-        // Update accessibility
-        this.updateMilestoneAccessibility();
+        containers.forEach(container => {
+            if (!container) return;
+            
+            // Add simple scrolling class
+            container.classList.add('scrolling');
+            
+            // Remove animation class after transition completes
+            setTimeout(() => {
+                container.classList.remove('scrolling');
+            }, 400);
+        });
+    }
+
+    /**
+     * Add visual scroll feedback
+     */
+    addScrollFeedback() {
+        // Add ripple effect to indicate scrolling
+        const containers = [this.topMilestoneContainer, this.bottomMilestoneContainer];
+        
+        containers.forEach(container => {
+            if (!container) return;
+            
+            // Create temporary ripple element
+            const ripple = document.createElement('div');
+            ripple.className = 'scroll-ripple';
+            ripple.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 0;
+                height: 0;
+                border: 2px solid rgba(0, 123, 255, 0.5);
+                border-radius: 50%;
+                animation: scrollRipple 0.6s ease-out;
+                pointer-events: none;
+                z-index: 100;
+            `;
+            
+            container.style.position = 'relative';
+            container.appendChild(ripple);
+            
+            // Remove ripple after animation
+            setTimeout(() => {
+                if (ripple.parentNode === container) {
+                    container.removeChild(ripple);
+                }
+            }, 600);
+        });
+    }
+
+    /**
+     * Debounced scroll handler to prevent too frequent updates
+     */
+    createDebouncedScrollHandler() {
+        let scrollTimeout;
+        
+        return () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                this.addScrollFeedback();
+            }, 100);
+        };
     }
     
     /**
-     * Create a milestone card element
+     * Show scroll indicators briefly
+     */
+    showScrollIndicators() {
+        const indicators = document.querySelectorAll('.scroll-indicator');
+        indicators.forEach(indicator => {
+            indicator.classList.add('visible');
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 2000);
+        });
+    }
+    
+    /**
+     * Create a milestone card element with no animations
      */
     createMilestoneCard(milestone) {
         const card = document.createElement('div');
@@ -424,7 +602,33 @@ class UnixClock {
         const isPast = milestone.timestamp <= this.state.currentTimestamp;
         card.classList.add(isPast ? 'past' : 'future');
         
-        // Create content
+        // No entrance animations - removed to prevent blinking
+        
+        // Create countdown column (leftmost)
+        const countdownColumn = document.createElement('div');
+        countdownColumn.className = 'milestone-countdown-column';
+        
+        const countdownData = this.calculateCountdown(milestone.timestamp, this.state.currentTimestamp);
+        const formattedCountdown = this.formatCountdownUnix(countdownData);
+        
+        const countdown = document.createElement('div');
+        countdown.className = 'milestone-countdown';
+        countdown.setAttribute('aria-live', 'polite');
+        countdown.setAttribute('aria-label', `${formattedCountdown.seconds} seconds ${formattedCountdown.direction}`);
+        
+        const countdownValue = document.createElement('div');
+        countdownValue.className = 'countdown-value';
+        countdownValue.innerHTML = formattedCountdown.seconds;
+        
+        const countdownLabel = document.createElement('div');
+        countdownLabel.className = 'countdown-label';
+        countdownLabel.textContent = formattedCountdown.direction;
+        
+        countdown.appendChild(countdownValue);
+        countdown.appendChild(countdownLabel);
+        countdownColumn.appendChild(countdown);
+        
+        // Create timestamp section (middle)
         const timestampSection = document.createElement('div');
         timestampSection.className = 'milestone-timestamp-section';
         
@@ -432,7 +636,7 @@ class UnixClock {
         timestamp.className = 'milestone-timestamp';
         const spacedTimestamp = this.createSpacedTimestamp(milestone.timestamp);
         
-        timestamp.textContent = spacedTimestamp;
+        timestamp.innerHTML = spacedTimestamp;
         timestamp.setAttribute('data-raw', milestone.timestamp.toString());
         timestamp.setAttribute('datetime', new Date(milestone.timestamp * 1000).toISOString());
         
@@ -443,6 +647,7 @@ class UnixClock {
         timestampSection.appendChild(timestamp);
         timestampSection.appendChild(date);
         
+        // Create details section (rightmost)
         const details = document.createElement('div');
         details.className = 'milestone-details';
         
@@ -459,124 +664,140 @@ class UnixClock {
             details.appendChild(significance);
         }
         
+        // Assemble card in order: countdown, timestamp, details
+        card.appendChild(countdownColumn);
         card.appendChild(timestampSection);
         card.appendChild(details);
         
-        return card;
-    }
-    
+        return card;    }
+
     /**
-     * Initialize accessibility features and keyboard navigation
+     * Calculate time difference and format as countdown
      */
-    initializeAccessibility() {
-        // Add keyboard navigation for milestone wheel (simplified)
-        document.addEventListener('keydown', (event) => {
-            if (event.target === document.body || event.target.classList.contains('milestone-card')) {
-                switch (event.key) {
-                    case 'Space':
-                        event.preventDefault();
-                        this.announceCurrentTime();
-                        break;
+    calculateCountdown(milestoneTimestamp, currentTimestamp) {
+        const timeDiff = Math.abs(milestoneTimestamp - currentTimestamp);
+        const isPast = milestoneTimestamp <= currentTimestamp;
+        
+        // Calculate time units
+        const years = Math.floor(timeDiff / (365.25 * 24 * 3600));
+        const days = Math.floor((timeDiff % (365.25 * 24 * 3600)) / (24 * 3600));
+        const hours = Math.floor((timeDiff % (24 * 3600)) / 3600);
+        const minutes = Math.floor((timeDiff % 3600) / 60);
+        const seconds = timeDiff % 60;
+        
+        return {
+            isPast,
+            years,
+            days,
+            hours,
+            minutes,
+            seconds,
+            totalSeconds: timeDiff
+        };
+    }
+
+    /**
+     * Format countdown display with appropriate units
+     */
+    formatCountdown(countdown) {
+        const { isPast, years, days, hours, minutes, seconds, totalSeconds } = countdown;
+        
+        // For very small differences (under 1 minute), show seconds
+        if (totalSeconds < 60) {
+            return {
+                primary: `${seconds}s`,
+                secondary: isPast ? 'ago' : 'from now',
+                compact: `${seconds}s`
+            };
+        }
+        
+        // For under 1 hour, show minutes and seconds
+        if (totalSeconds < 3600) {
+            return {
+                primary: `${minutes}m ${seconds}s`,
+                secondary: isPast ? 'ago' : 'from now',
+                compact: `${minutes}m`
+            };
+        }
+        
+        // For under 1 day, show hours and minutes
+        if (totalSeconds < 86400) {
+            return {
+                primary: `${hours}h ${minutes}m`,
+                secondary: isPast ? 'ago' : 'from now',
+                compact: `${hours}h`
+            };
+        }
+        
+        // For under 1 year, show days and hours
+        if (totalSeconds < 31557600) { // 365.25 * 24 * 3600
+            return {
+                primary: `${days}d ${hours}h`,
+                secondary: isPast ? 'ago' : 'from now',
+                compact: `${days}d`
+            };
+        }
+        
+        // For longer periods, show years and days
+        return {
+            primary: `${years}y ${days}d`,
+            secondary: isPast ? 'ago' : 'from now',
+            compact: `${years}y`
+        };
+    }
+
+    /**
+     * Format countdown display as Unix seconds with direction
+     */
+    formatCountdownUnix(countdown) {
+        const { isPast, totalSeconds } = countdown;
+        
+        return {
+            seconds: this.createSpacedTimestamp(totalSeconds),
+            direction: isPast ? 'ago' : 'from now'
+        };
+    }
+
+    /**
+     * Update all countdown timers in milestone cards
+     */
+    updateCountdownTimers() {
+        const currentTimestamp = this.state.currentTimestamp;
+        const milestoneCards = document.querySelectorAll('.milestone-card');
+        
+        milestoneCards.forEach((card) => {
+            const timestampAttr = card.querySelector('.milestone-timestamp')?.getAttribute('data-raw');
+            if (!timestampAttr) return;
+            
+            const milestoneTimestamp = parseInt(timestampAttr);
+            const countdown = this.calculateCountdown(milestoneTimestamp, currentTimestamp);
+            const formatted = this.formatCountdownUnix(countdown);
+            
+            // Update countdown display
+            const countdownElement = card.querySelector('.milestone-countdown');
+            if (countdownElement) {
+                const countdownValue = countdownElement.querySelector('.countdown-value');
+                const countdownLabel = countdownElement.querySelector('.countdown-label');
+                
+                if (countdownValue && countdownLabel) {
+                    // Only update if the content has changed
+                    const newValue = formatted.seconds;
+                    if (countdownValue.innerHTML !== newValue) {
+                        countdownValue.innerHTML = newValue;
+                    }
+                    if (countdownLabel.textContent !== formatted.direction) {
+                        countdownLabel.textContent = formatted.direction;
+                    }
+                    
+                    // Update accessibility attributes (extract raw number for aria-label)
+                    const rawSeconds = countdown.totalSeconds;
+                    const ariaLabel = `${rawSeconds} seconds ${formatted.direction}`;
+                    if (countdownElement.getAttribute('aria-label') !== ariaLabel) {
+                        countdownElement.setAttribute('aria-label', ariaLabel);
+                    }
                 }
             }
         });
-
-        // Add ARIA live region for time announcements
-        const liveRegion = document.createElement('div');
-        liveRegion.id = 'time-announcements';
-        liveRegion.setAttribute('aria-live', 'polite');
-        liveRegion.setAttribute('aria-atomic', 'true');
-        liveRegion.style.position = 'absolute';
-        liveRegion.style.left = '-10000px';
-        liveRegion.style.width = '1px';
-        liveRegion.style.height = '1px';
-        liveRegion.style.overflow = 'hidden';
-        document.body.appendChild(liveRegion);
-
-        // Make milestone cards focusable and add ARIA labels
-        this.updateMilestoneAccessibility();
-    }
-
-    /**
-     * Announce current time for screen readers
-     */
-    announceCurrentTime() {
-        const liveRegion = document.getElementById('time-announcements');
-        if (liveRegion) {
-            const timestamp = this.state.currentTimestamp;
-            const date = this.state.currentDateTime;
-            const announcement = `Current Unix timestamp is ${timestamp.toLocaleString()}. The time is ${date.toLocaleString()}`;
-            liveRegion.textContent = announcement;
-        }
-    }
-
-    /**
-     * Update accessibility attributes for milestone cards
-     */
-    updateMilestoneAccessibility() {
-        const milestoneCards = document.querySelectorAll('.milestone-card');
-        
-        milestoneCards.forEach((card, index) => {
-            const timestampElement = card.querySelector('.milestone-timestamp');
-            const descriptionElement = card.querySelector('.milestone-description');
-            const significanceElement = card.querySelector('.milestone-significance');
-            
-            if (!timestampElement || !descriptionElement) return;
-            
-            const timestamp = parseInt(timestampElement.getAttribute('data-raw'));
-            const description = descriptionElement.textContent;
-            const significance = significanceElement?.textContent || '';
-            
-            // Make cards focusable
-            card.setAttribute('tabindex', '0');
-            
-            // Add comprehensive ARIA labels
-            const isPast = timestamp <= this.state.currentTimestamp;
-            const status = isPast ? 'past' : 'future';
-            const date = new Date(timestamp * 1000);
-            
-            card.setAttribute('aria-label', 
-                `${status} milestone: ${description}. ` +
-                `Timestamp ${timestamp.toLocaleString()}. ` +
-                `Date ${date.toLocaleDateString()}. ` +
-                `${significance}`
-            );
-            
-            card.setAttribute('role', 'button');
-            card.setAttribute('aria-describedby', `milestone-${index}-details`);
-            
-            // Remove existing event listeners to avoid duplicates
-            const newCard = card.cloneNode(true);
-            card.parentNode.replaceChild(newCard, card);
-            
-            // Add click/enter handler for milestone details
-            newCard.addEventListener('click', () => this.focusMilestone({ timestamp, description, significance }));
-            newCard.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    this.focusMilestone({ timestamp, description, significance });
-                }
-            });
-        });
-    }
-
-    /**
-     * Focus and announce milestone details
-     */
-    focusMilestone(milestone) {
-        const liveRegion = document.getElementById('time-announcements');
-        if (liveRegion) {
-            const date = new Date(milestone.timestamp * 1000);
-            const isPast = milestone.timestamp <= this.state.currentTimestamp;
-            const status = isPast ? 'This milestone has passed' : 'This milestone is in the future';
-            
-            const announcement = `Focused milestone: ${milestone.description}. ` +
-                               `Unix timestamp ${milestone.timestamp.toLocaleString()}. ` +
-                               `Date ${date.toLocaleString()}. ` +
-                               `${milestone.significance || ''}. ${status}.`;
-                               
-            liveRegion.textContent = announcement;
-        }
     }
 
     /**
@@ -694,33 +915,22 @@ class UnixClock {
      * Clean up resources and event listeners
      */
     destroy() {
-        console.log('Destroying Unix Timestamp Clock...');
-        
+        // Stop the clock
         this.stopClock();
         
-        // Remove event listeners
+        // Remove all event listeners
         document.removeEventListener('visibilitychange', this.boundHandleVisibilityChange);
         document.removeEventListener('wheel', this.boundHandleWheel);
         document.removeEventListener('keydown', this.boundHandleKeyboard);
+        document.removeEventListener('touchstart', this.boundHandleTouchStart);
+        document.removeEventListener('touchmove', this.boundHandleTouchMove);
+        document.removeEventListener('touchend', this.boundHandleTouchEnd);
         
-        // Cancel animation frame if running
-        if (this.state.animationFrameId) {
-            cancelAnimationFrame(this.state.animationFrameId);
-        }
+        // Clear state
+        this.state.allMilestones = [];
+        this.state.visibleMilestones = { top: [], bottom: [] };
         
-        // Reset state
-        this.state = {
-            currentTimestamp: 0,
-            currentDateTime: null,
-            allMilestones: [],
-            visibleMilestones: {
-                top: [],
-                bottom: []
-            },
-            milestoneOffset: 0,
-            isRunning: false,
-            updateInterval: null
-        };
+        console.log('Unix Clock destroyed and cleaned up');
     }
 }
 
