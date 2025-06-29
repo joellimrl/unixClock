@@ -1,0 +1,35 @@
+# Folders to ignore
+.github/
+docs/
+
+# Test files and development artifacts
+test-*.html
+test-*.js
+debug-*.js
+debug-*.html
+
+# Development documentation
+improvements.md
+MILESTONE_FIXES.md
+README-updated.md
+transcript.md
+
+# Batch files for local development
+serve.bat
+start-server.bat
+
+# IDE and system files
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/

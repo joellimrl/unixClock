@@ -1,0 +1,383 @@
+/* Unix Timestamp Clock - Enhanced Wheel Design */
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-gradient-start: #f8f9fa;
+    --bg-gradient-end: #e9ecef;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-faded: rgba(44, 62, 80, 0.2);
+    --milestone-past: rgba(212, 237, 218, 0.4);
+    --milestone-future: rgba(204, 231, 255, 0.4);
+    --milestone-card-bg: rgba(255, 255, 255, 0.6);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scrolling only */
+    min-height: 100vh;
+}
+
+/* Container with centered layout */
+.clock-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto 1fr;
+    grid-template-areas: 
+        "top-milestones"
+        "main-clock"
+        "bottom-milestones";
+    padding: 1rem;
+    gap: 1rem;
+}
+
+/* Main Clock - Always centered */
+.main-clock {
+    grid-area: main-clock;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+}
+
+/* Milestone sections */
+.milestones-section {
+    position: relative;
+    overflow: hidden;
+    padding: 0 1rem;
+}
+
+.milestones-top {
+    grid-area: top-milestones;
+    display: flex;
+    align-items: flex-end;
+}
+
+.milestones-bottom {
+    grid-area: bottom-milestones;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Milestone containers with smooth scrolling */
+.milestone-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+#milestone-container-top {
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+#milestone-container-bottom {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.timestamp-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.unix-time {
+    font-family: 'Courier New', Consolas, Monaco, monospace;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: bold;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    display: inline-block;
+    /* Optimize spacing for thin space characters */
+    word-spacing: normal;
+    white-space: nowrap;
+}
+
+.utc-time {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    color: var(--text-secondary);
+    font-weight: 400;
+    opacity: 0.9;
+    font-family: 'Courier New', Consolas, Monaco, monospace;
+}
+
+/* Individual Milestone Cards - Compact Layout */
+.milestone-card {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
+    background: var(--milestone-card-bg);
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+.milestone-card:hover {
+    transform: translateY(-4px);
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Accessibility and Focus States */
+.milestone-card:focus {
+    outline: 3px solid #007bff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.milestone-card:focus-visible {
+    outline: 3px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Keyboard navigation hints */
+.clock-container::after {
+    content: "Press Space to hear current time";
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    backdrop-filter: blur(5px);
+}
+
+/* Hide keyboard hints on mobile */
+@media (max-width: 768px) {
+    .clock-container::after {
+        display: none;
+    }
+}
+
+/* Enhanced milestone card transitions */
+.milestone-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.milestone-card:hover,
+.milestone-card:focus {
+    transform: translateY(-4px);
+    z-index: 5;
+}
+
+/* Past/Future Milestone Styling */
+.milestone-card.past {
+    background: var(--milestone-past);
+    border-left: 3px solid #28a745;
+}
+
+.milestone-card.future {
+    background: var(--milestone-future);
+    border-left: 3px solid #007bff;
+}
+
+/* Milestone Content Layout */
+.milestone-timestamp-section {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.milestone-timestamp {
+    font-family: 'Courier New', Consolas, Monaco, monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    display: block;
+    position: relative;
+    white-space: nowrap;
+}
+
+.milestone-date {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-family: 'Courier New', Consolas, Monaco, monospace;
+    opacity: 0.7;
+}
+
+.milestone-details {
+    flex: 1;
+    text-align: left;
+}
+
+.milestone-description {
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.milestone-significance {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .clock-container {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .milestone-card {
+        padding: 0.875rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+        max-width: 400px;
+    }
+    
+    .milestone-details {
+        text-align: center;
+    }
+    
+    .unix-time {
+        font-size: clamp(2rem, 6vw, 3rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .clock-container {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+    
+    .milestone-card {
+        padding: 0.75rem;
+        max-width: 320px;
+        gap: 0.5rem;
+    }
+    
+    .milestone-timestamp {
+        font-size: 0.8rem;
+    }
+    
+    .milestone-description {
+        font-size: 0.7rem;
+    }
+    
+    .milestone-significance {
+        font-size: 0.6rem;
+    }
+    
+    .unix-time {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+    }
+    
+    .utc-time {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .milestone-wheel,
+    .milestone-card,
+    .unix-time {
+        transition: none;
+    }
+    
+    .milestone-card:hover {
+        transform: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .milestone-card {
+        border: 2px solid #000;
+        box-shadow: none;
+        background: #fff;
+    }
+    
+    .milestone-card.past {
+        background: #d4edda;
+        border-left-color: #000;
+    }
+    
+    .milestone-card.future {
+        background: #cce7ff;
+        border-left-color: #000;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.7;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* Loading spinner for better UX */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--text-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 1rem auto;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

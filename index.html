@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unix Timestamp Clock</title>
+    <meta name="description" content="Real-time Unix timestamp clock with rotating milestone wheel">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="clock-container">
+        <!-- Top Milestones -->
+        <section class="milestones-section milestones-top" aria-label="Past Milestones">
+            <div class="milestone-container" id="milestone-container-top">
+                <!-- Past milestones will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Main Clock Display - Always Centered -->
+        <section class="main-clock" aria-label="Current Unix Timestamp">
+            <div class="timestamp-display">
+                <time id="unix-timestamp" class="unix-time" datetime="">0</time>
+                <time id="utc-datetime" class="utc-time" datetime="">Loading...</time>
+            </div>
+        </section>
+
+        <!-- Bottom Milestones -->
+        <section class="milestones-section milestones-bottom" aria-label="Future Milestones">
+            <div class="milestone-container" id="milestone-container-bottom">
+                <!-- Future milestones will be inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

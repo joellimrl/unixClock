@@ -1,0 +1,64 @@
+{
+  "milestones": [
+    {
+      "timestamp": 1000000,
+      "description": "Unix timestamp reached 1 million",
+      "significance": "First major milestone - January 12, 1970"
+    },
+    {
+      "timestamp": 1000000000,
+      "description": "Unix timestamp reached 1 billion", 
+      "significance": "Billionth second since epoch - September 9, 2001"
+    },
+    {
+      "timestamp": 1234567890,
+      "description": "Unix timestamp 1234567890",
+      "significance": "Popular sequential timestamp - February 13, 2009"
+    },
+    {
+      "timestamp": 1500000000,
+      "description": "Unix timestamp reached 1.5 billion",
+      "significance": "Mid-way to 2 billion - July 14, 2017"
+    },
+    {
+      "timestamp": 1640995200,
+      "description": "New Year 2022",
+      "significance": "Start of 2022 - January 1, 2022"
+    },
+    {
+      "timestamp": 1735689600,
+      "description": "New Year 2025",
+      "significance": "Start of 2025 - January 1, 2025"
+    },
+    {
+      "timestamp": 1893456000,
+      "description": "New Year 2030",
+      "significance": "Start of 2030 - January 1, 2030"
+    },
+    {
+      "timestamp": 2000000000,
+      "description": "Unix timestamp reaches 2 billion",
+      "significance": "Future milestone - May 18, 2033"
+    },
+    {
+      "timestamp": 2147483647,
+      "description": "32-bit signed integer limit",
+      "significance": "Y2038 problem boundary - January 19, 2038"
+    },
+    {
+      "timestamp": 2524608000,
+      "description": "New Year 2050",
+      "significance": "Mid-century milestone - January 1, 2050"
+    },
+    {
+      "timestamp": 3000000000,
+      "description": "Unix timestamp reaches 3 billion",
+      "significance": "Far future milestone - January 24, 2065"
+    },
+    {
+      "timestamp": 4102444800,
+      "description": "New Year 2100",
+      "significance": "Turn of next century - January 1, 2100"
+    }
+  ]
+}
