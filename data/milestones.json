@@ -1,69 +1,479 @@
 {
   "milestones": [
     {
+      "timestamp": 0,
+      "description": "The Unix epoch",
+      "significance": "Where the count begins"
+    },
+    {
+      "timestamp": 1,
+      "description": "The second second",
+      "significance": "The very first tick after the epoch"
+    },
+    {
+      "timestamp": 60,
+      "description": "One minute in",
+      "significance": "Sixty seconds, and counting"
+    },
+    {
+      "timestamp": 3600,
+      "description": "The first hour",
+      "significance": "The epoch settles into its stride"
+    },
+    {
+      "timestamp": 65536,
+      "description": "Two to the sixteen",
+      "significance": "65,536 seconds: a small binary landmark"
+    },
+    {
+      "timestamp": 86400,
+      "description": "A day on the clock",
+      "significance": "The first 24 hours are complete"
+    },
+    {
+      "timestamp": 604800,
+      "description": "One week old",
+      "significance": "Seven days since the count began"
+    },
+    {
+      "timestamp": 999999,
+      "description": "Six nines",
+      "significance": "One second before the first million"
+    },
+    {
       "timestamp": 1000000,
-      "description": "Unix timestamp reached 1 million",
-      "significance": "First major milestone - January 12, 1970"
+      "description": "The first million",
+      "significance": "A million seconds into the epoch"
+    },
+    {
+      "timestamp": 1048576,
+      "description": "A mebi of seconds",
+      "significance": "Exactly 2²⁰ seconds since the epoch"
+    },
+    {
+      "timestamp": 10000000,
+      "description": "Eight digits arrive",
+      "significance": "Ten million seconds on the clock"
+    },
+    {
+      "timestamp": 16777216,
+      "description": "The 24-bit rollover",
+      "significance": "Exactly 2²⁴ seconds"
+    },
+    {
+      "timestamp": 31536000,
+      "description": "One year of Unix time",
+      "significance": "The first anniversary of the epoch"
+    },
+    {
+      "timestamp": 100000000,
+      "description": "One hundred million",
+      "significance": "The timestamp grows to nine digits"
+    },
+    {
+      "timestamp": 123454321,
+      "description": "A nine-digit mirror",
+      "significance": "Reads the same forwards and backwards"
+    },
+    {
+      "timestamp": 123456789,
+      "description": "Counting up",
+      "significance": "The digits one through nine, in order"
+    },
+    {
+      "timestamp": 268435456,
+      "description": "Two to the twenty-eight",
+      "significance": "A power of two hiding in decimal"
+    },
+    {
+      "timestamp": 500000000,
+      "description": "Half a billion",
+      "significance": "Five hundred million seconds from zero"
+    },
+    {
+      "timestamp": 946684800,
+      "description": "Hello, 2000",
+      "significance": "Midnight GMT at the start of 2000"
+    },
+    {
+      "timestamp": 951782400,
+      "description": "A leap day in a century year",
+      "significance": "Divisible by 400: February gets an extra day"
+    },
+    {
+      "timestamp": 978307200,
+      "description": "The 21st century begins",
+      "significance": "The first second of the new century"
+    },
+    {
+      "timestamp": 987654321,
+      "description": "Counting down",
+      "significance": "Nine to one, with no digits skipped"
+    },
+    {
+      "timestamp": 999999999,
+      "description": "Farewell, nine digits",
+      "significance": "The last second before one billion"
     },
     {
       "timestamp": 1000000000,
-      "description": "Unix timestamp reached 1 billion", 
-      "significance": "Billionth second since epoch - September 9, 2001"
+      "description": "The billionth second",
+      "significance": "Unix time reaches ten digits"
+    },
+    {
+      "timestamp": 1000000001,
+      "description": "A billion in the mirror",
+      "significance": "A ten-digit palindrome"
+    },
+    {
+      "timestamp": 1010101010,
+      "description": "Alternating ones and zeros",
+      "significance": "A decimal timestamp with a binary look"
+    },
+    {
+      "timestamp": 1073741824,
+      "description": "A gibi of seconds",
+      "significance": "Exactly 2³⁰ seconds since the epoch"
+    },
+    {
+      "timestamp": 1111111111,
+      "description": "Ten ones, one moment",
+      "significance": "A rare repeating timestamp"
+    },
+    {
+      "timestamp": 1212121212,
+      "description": "Twelve, on repeat",
+      "significance": "Five twelves in a row"
+    },
+    {
+      "timestamp": 1222222221,
+      "description": "A frame of ones",
+      "significance": "Eight twos between matching bookends"
+    },
+    {
+      "timestamp": 1234554321,
+      "description": "Up the stairs, back down",
+      "significance": "A perfectly mirrored ten-digit sequence"
     },
     {
       "timestamp": 1234567890,
-      "description": "Unix timestamp 1234567890",
-      "significance": "Popular sequential timestamp - February 13, 2009"
+      "description": "A perfect sequence",
+      "significance": "All ten digits, in order"
+    },
+    {
+      "timestamp": 1357924680,
+      "description": "Odds meet evens",
+      "significance": "Odd digits first, then even digits"
+    },
+    {
+      "timestamp": 1414213562,
+      "description": "A little irrational",
+      "significance": "The first ten digits of √2, without the dot"
+    },
+    {
+      "timestamp": 1444444441,
+      "description": "Fours in the mirror",
+      "significance": "A palindrome with eight fours at its heart"
     },
     {
       "timestamp": 1500000000,
-      "description": "Unix timestamp reached 1.5 billion",
-      "significance": "Mid-way to 2 billion - July 14, 2017"
+      "description": "One and a half billion",
+      "significance": "Halfway from one billion to two"
+    },
+    {
+      "timestamp": 1555555551,
+      "description": "High fives",
+      "significance": "Eight fives, framed by ones"
+    },
+    {
+      "timestamp": 1577836800,
+      "description": "Fifty years of counting",
+      "significance": "Half a century since the Unix epoch"
+    },
+    {
+      "timestamp": 1618033988,
+      "description": "The golden moment",
+      "significance": "The first ten digits of φ, without the dot"
     },
     {
       "timestamp": 1640995200,
-      "description": "New Year 2022",
-      "significance": "Start of 2022 - January 1, 2022"
+      "description": "Hello, 2022",
+      "significance": "A new year begins"
+    },
+    {
+      "timestamp": 1666666661,
+      "description": "Sixes in the mirror",
+      "significance": "Another ten-digit palindrome"
+    },
+    {
+      "timestamp": 1700000000,
+      "description": "1.7 billion seconds",
+      "significance": "Seventeen hundred million ticks"
+    },
+    {
+      "timestamp": 1709164800,
+      "description": "An extra day in 2024",
+      "significance": "Midnight GMT on leap day"
+    },
+    {
+      "timestamp": 1717171717,
+      "description": "Seventeen, five times",
+      "significance": "A repeating pair across ten digits"
+    },
+    {
+      "timestamp": 1732050807,
+      "description": "Rooted in three",
+      "significance": "The first ten digits of √3, without the dot"
     },
     {
       "timestamp": 1735689600,
-      "description": "New Year 2025",
-      "significance": "Start of 2025 - January 1, 2025"
+      "description": "Hello, 2025",
+      "significance": "A new year begins"
+    },
+    {
+      "timestamp": 1750000000,
+      "description": "Three quarters to two",
+      "significance": "1.75 billion seconds since the epoch"
     },
     {
       "timestamp": 1767225600,
-      "description": "New Year 2026",
-      "significance": "Start of 2026 - January 1, 2026"
+      "description": "Hello, 2026",
+      "significance": "A new year begins"
+    },
+    {
+      "timestamp": 1777777771,
+      "description": "Lucky in the middle",
+      "significance": "Eight sevens make a palindrome"
+    },
+    {
+      "timestamp": 1777777777,
+      "description": "A run of sevens",
+      "significance": "One leading one, then nine sevens"
+    },
+    {
+      "timestamp": 1788888888,
+      "description": "Eight eights",
+      "significance": "A long string of eights after seventeen"
+    },
+    {
+      "timestamp": 1798761600,
+      "description": "Hello, 2027",
+      "significance": "Another year, another first second"
+    },
+    {
+      "timestamp": 1799999999,
+      "description": "Almost 1.8 billion",
+      "significance": "One more tick to a round number"
+    },
+    {
+      "timestamp": 1800000000,
+      "description": "1.8 billion seconds",
+      "significance": "The next hundred-million mark"
+    },
+    {
+      "timestamp": 1800000081,
+      "description": "Eighteen, reflected",
+      "significance": "A palindrome with six zeros in the middle"
+    },
+    {
+      "timestamp": 1818181818,
+      "description": "Eighteen, on repeat",
+      "significance": "Five matching pairs on the clock"
+    },
+    {
+      "timestamp": 1830297600,
+      "description": "Hello, 2028",
+      "significance": "Midnight GMT at the start of 2028"
+    },
+    {
+      "timestamp": 1835395200,
+      "description": "February takes its time",
+      "significance": "An extra day in the leap year 2028"
+    },
+    {
+      "timestamp": 1861920000,
+      "description": "Hello, 2029",
+      "significance": "The final year of the twenties begins"
+    },
+    {
+      "timestamp": 1888888888,
+      "description": "Nine eights",
+      "significance": "A leading one, followed by nine eights"
     },
     {
       "timestamp": 1893456000,
-      "description": "New Year 2030",
-      "significance": "Start of 2030 - January 1, 2030"
+      "description": "A new decade",
+      "significance": "The first second of 2030"
+    },
+    {
+      "timestamp": 1900000000,
+      "description": "1.9 billion seconds",
+      "significance": "One step closer to two billion"
+    },
+    {
+      "timestamp": 1919191919,
+      "description": "Nineteen, on repeat",
+      "significance": "Five nineteens, one timestamp"
+    },
+    {
+      "timestamp": 1961625600,
+      "description": "A leap into 2032",
+      "significance": "Midnight GMT on another February 29"
+    },
+    {
+      "timestamp": 1999999999,
+      "description": "On the edge of two billion",
+      "significance": "One second before the big rollover"
     },
     {
       "timestamp": 2000000000,
-      "description": "Unix timestamp reaches 2 billion",
-      "significance": "Future milestone - May 18, 2033"
+      "description": "Two billion seconds",
+      "significance": "Another digit worth celebrating"
+    },
+    {
+      "timestamp": 2000000002,
+      "description": "Two billion, reflected",
+      "significance": "Two twos with eight zeros between them"
+    },
+    {
+      "timestamp": 2020202020,
+      "description": "Twenty, five times",
+      "significance": "A repeating pattern, independent of the year"
+    },
+    {
+      "timestamp": 2121212121,
+      "description": "Twenty-one, on repeat",
+      "significance": "Five pairs of two and one"
     },
     {
       "timestamp": 2147483647,
-      "description": "32-bit signed integer limit",
-      "significance": "Y2038 problem boundary - January 19, 2038"
+      "description": "The 32-bit boundary",
+      "significance": "The final signed 32-bit second"
+    },
+    {
+      "timestamp": 2147483648,
+      "description": "Beyond signed 32-bit time",
+      "significance": "2³¹ seconds: one past the signed limit"
+    },
+    {
+      "timestamp": 2208988800,
+      "description": "Hello, forties",
+      "significance": "The first second of the 2040s"
+    },
+    {
+      "timestamp": 2222222222,
+      "description": "A string of twos",
+      "significance": "Ten matching digits, once in time"
+    },
+    {
+      "timestamp": 2345678901,
+      "description": "The sequence shifts",
+      "significance": "Two through nine, then zero and one"
+    },
+    {
+      "timestamp": 2500000000,
+      "description": "Two and a half billion",
+      "significance": "Halfway from two billion to three"
     },
     {
       "timestamp": 2524608000,
-      "description": "New Year 2050",
-      "significance": "Mid-century milestone - January 1, 2050"
+      "description": "Halfway through the century",
+      "significance": "The first second of 2050"
+    },
+    {
+      "timestamp": 2718281828,
+      "description": "An exponential moment",
+      "significance": "The first ten digits of e, without the dot"
     },
     {
       "timestamp": 3000000000,
-      "description": "Unix timestamp reaches 3 billion",
-      "significance": "Far future milestone - January 24, 2065"
+      "description": "Three billion seconds",
+      "significance": "The epoch keeps counting"
+    },
+    {
+      "timestamp": 3141592653,
+      "description": "A slice of pi",
+      "significance": "The first ten digits of π, without the dot"
+    },
+    {
+      "timestamp": 3155760000,
+      "description": "A century of Unix time",
+      "significance": "One hundred years since the epoch"
+    },
+    {
+      "timestamp": 3333333333,
+      "description": "Nothing but threes",
+      "significance": "Ten threes, all at once"
+    },
+    {
+      "timestamp": 4000000000,
+      "description": "Four billion seconds",
+      "significance": "Another billion added to the story"
     },
     {
       "timestamp": 4102444800,
-      "description": "New Year 2100",
-      "significance": "Turn of next century - January 1, 2100"
+      "description": "Hello, 2100",
+      "significance": "The first second of 2100"
+    },
+    {
+      "timestamp": 4294967295,
+      "description": "The unsigned 32-bit limit",
+      "significance": "The largest unsigned 32-bit integer"
+    },
+    {
+      "timestamp": 4294967296,
+      "description": "Two to the thirty-two",
+      "significance": "One second beyond unsigned 32-bit time"
+    },
+    {
+      "timestamp": 4444444444,
+      "description": "All fours",
+      "significance": "Ten matching fours on the clock"
+    },
+    {
+      "timestamp": 5000000000,
+      "description": "Five billion seconds",
+      "significance": "Halfway to eleven digits"
+    },
+    {
+      "timestamp": 5555555555,
+      "description": "Ten high fives",
+      "significance": "Every digit is a five"
+    },
+    {
+      "timestamp": 6666666666,
+      "description": "A string of sixes",
+      "significance": "Ten sixes in a single moment"
+    },
+    {
+      "timestamp": 7777777777,
+      "description": "Sevens all the way",
+      "significance": "Ten sevens, no exceptions"
+    },
+    {
+      "timestamp": 8589934592,
+      "description": "Two to the thirty-three",
+      "significance": "Another binary power, another era"
+    },
+    {
+      "timestamp": 8888888888,
+      "description": "An abundance of eights",
+      "significance": "Ten eights fill the timestamp"
+    },
+    {
+      "timestamp": 9876543210,
+      "description": "The complete countdown",
+      "significance": "All ten digits, in descending order"
+    },
+    {
+      "timestamp": 9999999999,
+      "description": "The final ten-digit second",
+      "significance": "Ten nines before the counter grows"
+    },
+    {
+      "timestamp": 10000000000,
+      "description": "Hello, eleven digits",
+      "significance": "Ten billion seconds since the epoch"
     }
   ]
 }

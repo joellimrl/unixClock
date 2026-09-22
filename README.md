@@ -1,150 +1,53 @@
-# Unix Timestamp Clock
+# Unix Clock
 
-A real-time Unix timestamp clock with milestone tracking that displays the current Unix timestamp alongside significant historical and future timestamp milestones.
+A live Unix timestamp clock with a scrollable timeline of significant timestamps and a Unix-to-GMT converter. Built with plain HTML, CSS, and JavaScript; no build step or application dependencies.
+
+## Run locally
+
+```sh
+python3 -m http.server 8080 --bind 127.0.0.1
+```
+
+Open [localhost:8080](http://localhost:8080). An HTTP server is required for JavaScript modules and milestone data.
 
 ## Features
 
-- **Real-time Clock**: Updates every second with current Unix timestamp
-- **Milestone Tracking**: Shows past and future significant Unix timestamps
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Clean UI**: Minimalist design focusing on the timestamp display
-- **Performance Optimized**: Handles browser tab visibility changes efficiently
+- A large central Unix clock, updated every second, with its GMT date and time.
+- Past and future milestones sit in separate panels beside the central clock on wide screens, and below it on tablets. On phones, the past sits above the clock and the future below it. Focusing or scrolling a panel expands it while keeping the clock visible; tapping the clock or choosing **Back to now** restores the balanced layout. Scroll or swipe inside either panel to explore, or focus a list and use the arrow keys. The gesture area extends across the clock workspace: left/right controls past/future on desktop and tablets; above/below the clock’s midpoint controls past/future on phones. Swipes keep their starting timeline even when crossing the clock. The layout shares the available screen height so desktop, tablet, and phone views keep scrolling inside the milestone panels. Exceptionally short windows can still scroll the page to keep controls reachable. **Back to now** returns both lists to the nearest milestones.
+- Select any milestone to open its GMT conversion, or open **Converter** to enter a custom timestamp.
+- Explicit seconds and milliseconds modes, negative timestamps, validation, ISO 8601 output, and copy controls.
+- Keyboard accessible modal with Escape to close, responsive layouts, and reduced-motion/high-contrast preferences.
+- Clock and converter remain available if milestone data cannot load.
 
-## Project Structure
+The clock uses the device's system time. GMT output always uses UTC+00:00, without daylight saving adjustments. Unix time does not count leap seconds. Google Fonts provides DM Sans and Space Grotesk; system fonts are used when unavailable.
 
-```
-unixClock/
-├── index.html              # Main application (requires HTTP server)
-├── test.html              # Standalone test version (works with file://)
-├── styles.css             # All styling and responsive design
-├── script.js              # Main UnixClock class and logic
-├── start-server.bat       # Windows batch file to start local server
-├── README.md              # Project documentation
-└── data/
-    └── milestones.json    # Milestone timestamp data
-```
+## Project structure
 
-## Getting Started
+- `index.html` — clock, timeline, and converter markup
+- `styles.css` — responsive light theme
+- `script.js` — clock, milestones, scrolling, and converter interactions
+- `time-utils.mjs` — timestamp validation and conversion
+- `time-utils.test.mjs` — conversion regression tests
+- `data/milestones.json` — editable milestone data
 
-### Option 1: Quick Test (File-based)
-1. Open `test.html` directly in your browser
-2. No server required - uses inline milestone data
+## Add a milestone
 
-### Option 2: Full Version (HTTP Server)
-1. **Using the batch file (Windows):**
-   - Double-click `start-server.bat`
-   - Open http://localhost:8080 in your browser
-
-2. **Using Python manually:**
-   ```bash
-   cd unixClock
-   python -m http.server 8080
-   ```
-   - Open http://localhost:8080 in your browser
-
-3. **Using Node.js (if available):**
-   ```bash
-   npx serve .
-   ```
-
-## How It Works
-
-### Main Components
-
-1. **UnixClock Class**: Manages the real-time clock and milestone categorization
-2. **Milestone System**: Loads and categorizes timestamps into past/future
-3. **Responsive UI**: Adapts layout for different screen sizes
-4. **State Management**: Efficiently tracks current time and milestone states
-
-### Key Features
-
-- **Accurate Timing**: Uses `Math.floor(Date.now() / 1000)` for precise Unix timestamps
-- **Smart Updates**: Only re-renders milestones when categorization changes
-- **Visibility Handling**: Pauses updates when browser tab is hidden
-- **Error Resilient**: Continues working even if milestone data fails to load
-
-## Customization
-
-### Adding New Milestones
-
-Edit `data/milestones.json` to add new milestone timestamps:
+Add an entry to the `milestones` array in `data/milestones.json`. Dates are calculated from timestamps in GMT, and entries are sorted automatically.
 
 ```json
 {
   "timestamp": 1234567890,
-  "description": "Your milestone description",
-  "significance": "Why this timestamp is important (optional)"
+  "description": "A perfect sequence",
+  "significance": "All ten digits, in order"
 }
 ```
 
-### Configuration Options
+## Test
 
-In `script.js`, modify the `config` object:
+With Node.js 18 or newer:
 
-```javascript
-this.config = {
-    updateFrequency: 1000,        // Update interval in milliseconds
-    maxDisplayedMilestones: 3,    // Number of milestones to show per section
-    milestoneDataPath: './data/milestones.json'  // Path to milestone data
-};
+```sh
+node --test time-utils.test.mjs
 ```
 
-## Browser Compatibility
-
-- **Modern Browsers**: Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
-- **Required Features**: ES6+ support, Fetch API, CSS Grid/Flexbox
-- **Responsive**: Works on all screen sizes from mobile to desktop
-
-## Technical Details
-
-### Performance Optimizations
-
-- DOM element references cached on initialization
-- Milestone re-categorization only occurs when needed
-- Efficient string comparison to detect changes
-- Automatic cleanup of intervals and event listeners
-
-### Accessibility Features
-
-- Semantic HTML structure with proper ARIA labels
-- Screen reader friendly time element markup
-- High contrast mode support
-- Reduced motion preferences respected
-
-### State Management
-
-The application maintains state for:
-- Current timestamp and datetime
-- All loaded milestones
-- Categorized past/future milestones
-- Clock running status and update interval
-
-## Development Notes
-
-### Code Standards
-
-- ES6+ JavaScript with modern syntax
-- Mobile-first responsive CSS design
-- Semantic HTML structure
-- Error handling and logging
-- Clean separation of concerns
-
-### Testing
-
-1. **Real-time Updates**: Verify timestamp updates every second
-2. **Milestone Transitions**: Test when timestamps pass milestone boundaries
-3. **Responsive Design**: Check layout on different screen sizes
-4. **Error Handling**: Test with missing or invalid milestone data
-5. **Browser Compatibility**: Test across different browsers
-
-## License
-
-This project is created for educational and demonstration purposes.
-
-## Contributing
-
-To contribute improvements:
-1. Test your changes thoroughly
-2. Ensure responsive design works across devices
-3. Maintain accessibility standards
-4. Follow existing code patterns and naming conventions
+Tests cover epoch zero, dates before the epoch, the 2038 boundary, millisecond precision, invalid input, supported date range limits, and BC date labels.

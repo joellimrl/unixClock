@@ -1,37 +1,213 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unix Timestamp Clock</title>
-    <meta name="description" content="Real-time Unix timestamp clock with rotating milestone wheel">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <main class="clock-container">
-        <!-- Top Milestones -->
-        <section class="milestones-section milestones-top" aria-label="Past Milestones">
-            <div class="milestone-container" id="milestone-container-top">
-                <!-- Past milestones will be inserted here -->
-            </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f6f8" />
+    <meta
+      name="description"
+      content="Every second has a place in history. A live Unix clock, scrollable timestamp milestones, and a Unix to GMT converter."
+    />
+    <title>Unix Clock — A moment in time</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23263748'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 9v7l5 3' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="script.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="Unix Clock home"
+        ><span class="brand-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M12 6.5V12l3.5 2" /></svg></span
+        >unix<span class="wordmark-light">clock</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a class="nav-active" href="#clock">The clock</a
+        ><button class="nav-converter" data-open-converter>
+          Converter <span aria-hidden="true">↗</span>
+        </button>
+      </nav>
+      <span class="header-note">A moment in time.</span>
+    </header>
+
+    <main id="clock" class="clock-workspace">
+      <div class="orbit orbit-one" aria-hidden="true"></div>
+      <div class="orbit orbit-two" aria-hidden="true"></div>
+
+      <div class="timeline">
+
+        <section
+          class="milestones-section past-section"
+          aria-labelledby="past-heading"
+        >
+          <div class="section-heading">
+            <h2 id="past-heading">
+              <span class="status-dot past-dot"></span>Moments behind us
+            </h2>
+            <span class="scroll-hint"
+              >Scroll to explore <span aria-hidden="true">↕</span></span
+            >
+          </div>
+          <div
+            class="milestone-scroll past-scroll"
+            id="past-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Past timestamps, scroll for older milestones"
+          >
+            <div id="milestone-container-top" class="milestone-list"></div>
+          </div>
         </section>
 
-        <!-- Main Clock Display - Always Centered -->
-        <section class="main-clock" aria-label="Current Unix Timestamp">
-            <div class="timestamp-display">
-                <time id="unix-timestamp" class="unix-time" datetime="">0</time>
-                <time id="utc-datetime" class="utc-time" datetime="">Loading...</time>
-            </div>
+        <section class="main-clock" aria-label="Current Unix timestamp">
+          <div class="live-label">
+            <span class="status-dot"></span>Right now, in Unix time
+          </div>
+          <div class="timestamp-line">
+            <time id="unix-timestamp" class="unix-time">—</time>
+          </div>
+          <div class="clock-subline">
+            <time id="utc-datetime">Loading current time…</time
+            ><span class="timezone">GMT</span
+            ><button
+              id="copy-clock"
+              class="icon-button"
+              aria-label="Copy current Unix timestamp"
+              title="Copy timestamp"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="8" y="8" width="11" height="12" rx="2" />
+                <path
+                  d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="second-track" aria-hidden="true">
+            <span id="second-marker"></span>
+          </div>
+          <p class="epoch-caption">Seconds since January 1, 1970.</p>
         </section>
 
-        <!-- Bottom Milestones -->
-        <section class="milestones-section milestones-bottom" aria-label="Future Milestones">
-            <div class="milestone-container" id="milestone-container-bottom">
-                <!-- Future milestones will be inserted here -->
-            </div>
+
+        <section
+          class="milestones-section future-section"
+          aria-labelledby="future-heading"
+        >
+          <div class="section-heading">
+            <h2 id="future-heading">
+              <span class="status-dot future-dot"></span>Still to come
+            </h2>
+            <button id="back-to-now" class="text-button">
+              Back to now <span aria-hidden="true">↺</span>
+            </button>
+          </div>
+          <div
+            class="milestone-scroll future-scroll"
+            id="future-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Future timestamps, scroll for later milestones"
+          >
+            <div id="milestone-container-bottom" class="milestone-list"></div>
+          </div>
         </section>
+      </div>
+
+      <p id="milestone-error" class="data-error" role="status" hidden></p>
+      <div class="explore-note">
+        <span class="mouse-icon" aria-hidden="true"></span>
+        <span class="wide-scroll-note">Scroll left for the past. Right for the future.</span>
+        <span class="mobile-scroll-note">Scroll above for the past. Below for the future.</span>
+      </div>
     </main>
 
-    <script src="script.js"></script>
-</body>
+    <footer class="site-footer">
+      <span><span class="status-dot"></span>Every second counts.</span
+      ><button data-open-converter>
+        Unix → GMT <span aria-hidden="true">↗</span></button
+      ><span>One epoch. A world of moments.</span>
+    </footer>
+    <div id="toast" class="toast" role="status"></div>
+
+    <dialog id="converter-dialog" aria-labelledby="converter-title">
+      <div class="dialog-topline">
+        <span class="converter-symbol" aria-hidden="true">↔</span
+        ><button
+          id="close-converter"
+          class="icon-button"
+          aria-label="Close converter"
+        >
+          ✕
+        </button>
+      </div>
+      <h1 id="converter-title">Put a date to it.</h1>
+      <p class="dialog-description">
+        Turn a Unix timestamp into a moment in GMT.
+      </p>
+      <form id="converter-form" novalidate>
+        <div class="input-heading">
+          <label for="timestamp-input">Unix timestamp</label
+          ><button type="button" id="use-now" class="text-button">
+            Use current time
+          </button>
+        </div>
+        <div class="input-shell">
+          <input
+            id="timestamp-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="converter-hint converter-error"
+            placeholder="e.g. 1234567890"
+            required
+          /><select id="timestamp-unit" aria-label="Timestamp unit">
+            <option value="seconds">Seconds</option>
+            <option value="milliseconds">Milliseconds</option>
+          </select>
+        </div>
+        <p id="converter-hint" class="field-hint">
+          Negative timestamps work too. Time before the epoch.
+        </p>
+        <p id="converter-error" class="field-error" role="alert" hidden></p>
+        <button type="submit" class="convert-button">
+          Convert to GMT <span aria-hidden="true">→</span>
+        </button>
+      </form>
+      <section
+        class="conversion-result"
+        id="conversion-result"
+        aria-label="Conversion result"
+        aria-live="polite"
+        hidden
+      >
+        <div class="result-heading">
+          <span>Greenwich Mean Time</span
+          ><span class="timezone">GMT +00:00</span>
+        </div>
+        <p id="result-date" class="result-date"></p>
+        <p id="result-time" class="result-time"></p>
+        <div class="iso-row">
+          <div>
+            <span class="field-hint">ISO 8601</span
+            ><code id="result-iso"></code>
+          </div>
+          <button id="copy-result" class="text-button">Copy</button>
+        </div>
+      </section>
+      <p class="converter-footnote">
+        GMT stays at UTC+00:00. No daylight saving adjustment.
+      </p>
+    </dialog>
+    <noscript
+      ><p class="data-error">
+        Enable JavaScript to use the live clock, milestones, and converter.
+      </p></noscript
+    >
+  </body>
 </html>
